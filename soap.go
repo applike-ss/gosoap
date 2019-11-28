@@ -46,6 +46,7 @@ type Client struct {
 	Definitions  *wsdlDefinitions
 	// Must be set before first request otherwise has no effect, minimum is 15 minutes.
 	RefreshDefinitionsAfter time.Duration
+	Authorization           string
 	Username                string
 	Password                string
 
@@ -184,6 +185,10 @@ func (p *process) doRequest(url string) ([]byte, error) {
 
 	if p.Client.Username != "" && p.Client.Password != "" {
 		req.SetBasicAuth(p.Client.Username, p.Client.Password)
+	}
+
+	if p.Client.Authorization != "" {
+		req.Header.Add("Authorization", p.Client.Authorization)
 	}
 
 	req.ContentLength = int64(len(p.Payload))
