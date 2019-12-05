@@ -73,6 +73,36 @@ func (tokens *tokenData) recursiveEncode(hm interface{}) {
 	case reflect.String:
 		content := xml.CharData(v.String())
 		tokens.data = append(tokens.data, content)
+	case reflect.Int64:
+		content := xml.CharData(fmt.Sprintf("%d", v.Int()))
+		tokens.data = append(tokens.data, content)
+	case reflect.Struct:
+		// name := v.Type().Name()
+		// t := xml.StartElement{
+		// 	Name: xml.Name{
+		// 		Space: "",
+		// 		Local: name,
+		// 	},
+		// }
+
+		// tokens.data = append(tokens.data, t)
+		for i := 0; i < v.NumField(); i++ {
+			val := v.Field(i).Interface()
+			t := xml.StartElement{
+				Name: xml.Name{
+					Space: "",
+					Local: v.Type().Field(i).Tag.Get("xml"),
+				},
+			}
+
+			tokens.data = append(tokens.data, t)
+			tokens.recursiveEncode(val)
+			tokens.data = append(tokens.data, xml.EndElement{Name: t.Name})
+		}
+		// tokens.data = append(tokens.data, xml.EndElement{Name: xml.Name{
+		// 	Space: "",
+		// 	Local: name,
+		// }})
 	}
 }
 
